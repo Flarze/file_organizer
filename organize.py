@@ -11,8 +11,9 @@
 
 import os
 import sys
+from pathlib import Path
 
-print(os.listdir())
+print(os.listdir("./downloads"))
 
 DIRS = (
     "./downloads/images",
@@ -24,7 +25,7 @@ DIRS = (
     "./downloads/other",
 )
 
-IMAGES = (".png", ".svg", ".jpg", ".jpeg", ".gif", ".AVIF", ".WebP")
+IMAGES = (".png", ".svg", ".jpg", ".jpeg", ".gif", ".avif", ".webp")
 DOCS = (".txt", ".docx", ".pdf", ".odt", ".rtf", ".md", ".csv", ".json")
 VIDEOS = (".mp4", ".mov", ".mkv", ".avi", ".wmv", ".webm")
 MUSIC = (".mp3", ".wav", ".flac", ".aac", ".m4a")
@@ -42,6 +43,23 @@ else:
     sys.exit()
 
 
-for file in os.listdir():
+for file in os.listdir("./downloads"):
+    path = Path(f"./downloads/{file}")
+    target = Path(f"./downloads/images/{file}")
+
+    if not path.is_file():
+        continue
+
     if file.endswith(IMAGES):
-        print("counted")
+        if not Path(f"./downloads/images/{file}").is_file():
+            path.rename(f"./downloads/images/{file}")
+            print("Sorted")
+        else:
+            counter = 1
+            while os.path.exists(
+                f"./downloads/images/{path.stem} ({counter}){path.suffix}"
+            ):
+                counter += 1
+            path.rename(f"./downloads/images/{path.stem} ({counter}){path.suffix}")
+
+print("Files Successfully Sorted")
