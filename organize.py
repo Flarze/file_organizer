@@ -19,7 +19,6 @@ DIRS = (
     "./downloads/images",
     "./downloads/docs",
     "./downloads/videos",
-    "./downloads/videos",
     "./downloads/music",
     "./downloads/programs",
     "./downloads/other",
@@ -50,6 +49,7 @@ for file in os.listdir("./downloads"):
     if not path.is_file():
         continue
 
+    # Images
     if file.endswith(IMAGES):
         if not Path(f"./downloads/images/{file}").is_file():
             path.rename(f"./downloads/images/{file}")
@@ -61,5 +61,70 @@ for file in os.listdir("./downloads"):
             ):
                 counter += 1
             path.rename(f"./downloads/images/{path.stem} ({counter}){path.suffix}")
+
+    # Docs
+    elif file.endswith(DOCS):
+        if not Path(f"./downloads/docs/{file}").is_file():
+            path.rename(f"./downloads/docs/{file}")
+            print("Sorted")
+        else:
+            counter = 1
+            while os.path.exists(
+                f"./downloads/docs/{path.stem} ({counter}){path.suffix}"
+            ):
+                counter += 1
+            path.rename(f"./downloads/docs/{path.stem} ({counter}){path.suffix}")
+
+    # Videos
+    elif file.endswith(VIDEOS):
+        if not Path(f"./downloads/videos/{file}").is_file():
+            path.rename(f"./downloads/videos/{file}")
+            print("Sorted")
+        else:
+            counter = 1
+            while os.path.exists(
+                f"./downloads/videos/{path.stem} ({counter}){path.suffix}"
+            ):
+                counter += 1
+            path.rename(f"./downloads/videos/{path.stem} ({counter}){path.suffix}")
+
+    # Music
+    elif file.endswith(MUSIC):
+        if not Path(f"./downloads/music/{file}").is_file():
+            path.rename(f"./downloads/music/{file}")
+            print("Sorted")
+        else:
+            counter = 1
+            while os.path.exists(
+                f"./downloads/music/{path.stem} ({counter}){path.suffix}"
+            ):
+                counter += 1
+            path.rename(f"./downloads/music/{path.stem} ({counter}){path.suffix}")
+
+    # Programs
+    elif file.endswith(PROGRAMS):
+        if not Path(f"./downloads/programs/{file}").is_file():
+            path.rename(f"./downloads/programs/{file}")
+            print("Sorted")
+        else:
+            counter = 1
+            while os.path.exists(
+                f"./downloads/programs/{path.stem} ({counter}){path.suffix}"
+            ):
+                counter += 1
+            path.rename(f"./downloads/programs/{path.stem} ({counter}){path.suffix}")
+
+    # Other
+    else:
+        if not Path(f"./downloads/other/{file}").is_file():
+            path.rename(f"./downloads/other/{file}")
+            print("Sorted")
+        else:
+            counter = 1
+            while os.path.exists(
+                f"./downloads/other/{path.stem} ({counter}){path.suffix}"
+            ):
+                counter += 1
+            path.rename(f"./downloads/other/{path.stem} ({counter}){path.suffix}")
 
 print("Files Successfully Sorted")
