@@ -44,8 +44,10 @@ def sort_file(file: Path):
         try:
             file.rename(dest)
             print(f"Moved {file.name} -> {category}/{dest.name}")
+            return True
         except Exception as e:
-            print(e)
+            print(f"Failed to move {file.name}: {e}")
+            return False
     else:
         print(f"Would Move {file.name} -> {category}/{dest.name}")
 
@@ -56,14 +58,14 @@ def main():
         for category in EXTENSIONS:
             Path(abspath / category).mkdir(exist_ok=True)
     else:
-        print("[Dry Run] Enabled. No Changes Will Be Made")
+        print("[Dry Run Enabled] - No Changes Will Be Made")
 
     sorted_files = 0
     # Main Function
     for file in abspath.iterdir():
         if file.is_file():
-            sort_file(file)
-            sorted_files += 1
+            if sort_file(file):
+                sorted_files += 1
     if not args.dry_run:
         if sorted_files > 0:
             print(f"Sorted {sorted_files} Files")
