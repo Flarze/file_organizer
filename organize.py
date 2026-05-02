@@ -55,7 +55,7 @@ def sort_file(file: Path):
 def main():
     # Create Folders at Path if not yet exists
     if not args.dry_run:
-        for category in EXTENSIONS:
+        for category in list(EXTENSIONS) + ["other"]:
             Path(abspath / category).mkdir(exist_ok=True)
     else:
         print("[Dry Run Enabled] - No Changes Will Be Made")
