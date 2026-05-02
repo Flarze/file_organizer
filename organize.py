@@ -9,122 +9,71 @@
 # Creates destination folder if it doesn't exist yet.
 # When does prints an exit message such as "successfully sorted folder" or "failed to sort folder"
 
-import os
-import sys
+import argparse
 from pathlib import Path
 
-print(os.listdir("./downloads"))
+EXTENSIONS = {
+    "images": (".png", ".svg", ".jpg", ".jpeg", ".gif", ".avif", ".webp"),
+    "docs": (".txt", ".docx", ".pdf", ".odt", ".rtf", ".md", ".csv", ".json"),
+    "videos": (".mp4", ".mov", ".mkv", ".avi", ".wmv", ".webm"),
+    "music": (".mp3", ".wav", ".flac", ".aac", ".m4a"),
+    "programs": (".exe", ".jar", ".bin", ".msi", ".sh", ".py", ".js", ".bat"),
+}
 
-DIRS = (
-    "./downloads/images",
-    "./downloads/docs",
-    "./downloads/videos",
-    "./downloads/music",
-    "./downloads/programs",
-    "./downloads/other",
-)
-
-IMAGES = (".png", ".svg", ".jpg", ".jpeg", ".gif", ".avif", ".webp")
-DOCS = (".txt", ".docx", ".pdf", ".odt", ".rtf", ".md", ".csv", ".json")
-VIDEOS = (".mp4", ".mov", ".mkv", ".avi", ".wmv", ".webm")
-MUSIC = (".mp3", ".wav", ".flac", ".aac", ".m4a")
-PROGRAMS = (".exe", ".jar", ".bin", ".msi", ".sh", ".py", ".js", ".bat")
-
-if os.getcwd().endswith("/file_organizer"):
-    print("Running Organizer")
-    for dir in DIRS:
-        try:
-            os.mkdir(dir)
-        except FileExistsError:
-            pass
-else:
-    print("Run In Downloads Folder")
-    sys.exit()
+# Parse CLI for folder Path
+parser = argparse.ArgumentParser()
+parser.add_argument("folder", type=Path)
+parser.add_argument("--dry-run", action="store_true")
+args = parser.parse_args()
+abspath = args.folder
 
 
-for file in os.listdir("./downloads"):
-    path = Path(f"./downloads/{file}")
-    target = Path(f"./downloads/images/{file}")
+# Get category of items at Path
+def get_category(file: Path):
+    for category, ext in EXTENSIONS.items():
+        if file.suffix.lower() in ext:
+            return category
+    return "other"
 
-    if not path.is_file():
-        continue
 
-    # Images
-    if file.endswith(IMAGES):
-        if not Path(f"./downloads/images/{file}").is_file():
-            path.rename(f"./downloads/images/{file}")
-            print("Sorted")
-        else:
-            counter = 1
-            while os.path.exists(
-                f"./downloads/images/{path.stem} ({counter}){path.suffix}"
-            ):
-                counter += 1
-            path.rename(f"./downloads/images/{path.stem} ({counter}){path.suffix}")
+# Check if file name already exists to handle duplicates
+def unique_dest(dest: Path):
+    if not dest.exists():
+        return dest
+    counter = 1
+    while True:
+        uniquedest = dest.with_name(f"{dest.stem} ({counter}){dest.suffix}")
+        if not uniquedest.exists():
+            return uniquedest
+        counter += 1
 
-    # Docs
-    elif file.endswith(DOCS):
-        if not Path(f"./downloads/docs/{file}").is_file():
-            path.rename(f"./downloads/docs/{file}")
-            print("Sorted")
-        else:
-            counter = 1
-            while os.path.exists(
-                f"./downloads/docs/{path.stem} ({counter}){path.suffix}"
-            ):
-                counter += 1
-            path.rename(f"./downloads/docs/{path.stem} ({counter}){path.suffix}")
 
-    # Videos
-    elif file.endswith(VIDEOS):
-        if not Path(f"./downloads/videos/{file}").is_file():
-            path.rename(f"./downloads/videos/{file}")
-            print("Sorted")
-        else:
-            counter = 1
-            while os.path.exists(
-                f"./downloads/videos/{path.stem} ({counter}){path.suffix}"
-            ):
-                counter += 1
-            path.rename(f"./downloads/videos/{path.stem} ({counter}){path.suffix}")
-
-    # Music
-    elif file.endswith(MUSIC):
-        if not Path(f"./downloads/music/{file}").is_file():
-            path.rename(f"./downloads/music/{file}")
-            print("Sorted")
-        else:
-            counter = 1
-            while os.path.exists(
-                f"./downloads/music/{path.stem} ({counter}){path.suffix}"
-            ):
-                counter += 1
-            path.rename(f"./downloads/music/{path.stem} ({counter}){path.suffix}")
-
-    # Programs
-    elif file.endswith(PROGRAMS):
-        if not Path(f"./downloads/programs/{file}").is_file():
-            path.rename(f"./downloads/programs/{file}")
-            print("Sorted")
-        else:
-            counter = 1
-            while os.path.exists(
-                f"./downloads/programs/{path.stem} ({counter}){path.suffix}"
-            ):
-                counter += 1
-            path.rename(f"./downloads/programs/{path.stem} ({counter}){path.suffix}")
-
-    # Other
+def sort_file(file: Path):
+    if not args.dry_run:
+        category = get_category(file)
+        dest = unique_dest(abspath / category / file.name)
+        file.rename(dest)
+        print(f"Moved {file.name} -> {category}/{dest.name}")
     else:
-        if not Path(f"./downloads/other/{file}").is_file():
-            path.rename(f"./downloads/other/{file}")
-            print("Sorted")
-        else:
-            counter = 1
-            while os.path.exists(
-                f"./downloads/other/{path.stem} ({counter}){path.suffix}"
-            ):
-                counter += 1
-            path.rename(f"./downloads/other/{path.stem} ({counter}){path.suffix}")
+        category = get_category(file)
+        dest = unique_dest(abspath / category / file.name)
+        print(f"Would Have Moved {file.name} -> {category}/{dest.name}")
 
-print("Files Successfully Sorted")
+
+def main():
+    # Create Folders at Path if not yet exists
+    if args.dry_run:
+        print("[Dry Run] Enabled. No Changes Will Be Made")
+    for category in EXTENSIONS:
+        Path(abspath / category).mkdir(exist_ok=True)
+
+    # Main Function
+    for file in abspath.iterdir():
+        if file.is_file():
+            sort_file(file)
+
+    print("Files Successfully Sorted")
+
+
+if __name__ == "__main__":
+    main()
