@@ -1,14 +1,3 @@
-# A file organizer that sorts the downloads folder into different categories based on the files extension.
-# Images (.png .svg .jpg .jpeg .gif .AVIF and .WebP)
-# Docs (.docx .pdf .txt .odt .rtf .md .csv .json)
-# Videos (.mp4 .mov .mkv .avi .wmv .webm)
-# Music (.mp3 .wav .flac .aac .m4a)
-# Programs (.exe .jar .bin .msi .sh .py .js .bat)
-# Other (anything not listed before)
-# Duplicate files are appended with (amount + 1)
-# Creates destination folder if it doesn't exist yet.
-# When does prints an exit message such as "successfully sorted folder" or "failed to sort folder"
-
 import argparse
 from pathlib import Path
 
@@ -49,30 +38,37 @@ def unique_dest(dest: Path):
 
 
 def sort_file(file: Path):
+    category = get_category(file)
+    dest = unique_dest(abspath / category / file.name)
     if not args.dry_run:
-        category = get_category(file)
-        dest = unique_dest(abspath / category / file.name)
-        file.rename(dest)
-        print(f"Moved {file.name} -> {category}/{dest.name}")
+        try:
+            file.rename(dest)
+            print(f"Moved {file.name} -> {category}/{dest.name}")
+        except Exception as e:
+            print(e)
     else:
-        category = get_category(file)
-        dest = unique_dest(abspath / category / file.name)
-        print(f"Would Have Moved {file.name} -> {category}/{dest.name}")
+        print(f"Would Move {file.name} -> {category}/{dest.name}")
 
 
 def main():
     # Create Folders at Path if not yet exists
-    if args.dry_run:
+    if not args.dry_run:
+        for category in EXTENSIONS:
+            Path(abspath / category).mkdir(exist_ok=True)
+    else:
         print("[Dry Run] Enabled. No Changes Will Be Made")
-    for category in EXTENSIONS:
-        Path(abspath / category).mkdir(exist_ok=True)
 
+    sorted_files = 0
     # Main Function
     for file in abspath.iterdir():
         if file.is_file():
             sort_file(file)
-
-    print("Files Successfully Sorted")
+            sorted_files += 1
+    if not args.dry_run:
+        if sorted_files > 0:
+            print(f"Sorted {sorted_files} Files")
+        else:
+            print("No Files Found")
 
 
 if __name__ == "__main__":
